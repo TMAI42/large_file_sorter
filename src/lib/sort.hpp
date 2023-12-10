@@ -17,12 +17,11 @@
 
 namespace sorting_algorithms {
 
-
     void merge_chunks(const std::string& binary_file_name, const std::vector<size_t>& chunk_starts, const size_t max_chunk_size, const std::string& output_file_name) {
         std::ifstream binary_file(binary_file_name, std::ios::binary);
         std::ofstream output_file(output_file_name, std::ios::out);
 
-        std::vector<std::pair<double, size_t>> heap; // here could be priority queue, but std has bag in it when sorting floats/doubles
+        std::vector<std::pair<double, size_t>> heap; // here could be priority queue, but std has bag in it when sorting floats/doubles in 23 standard in gcc
         heap.reserve(chunk_starts.size());
         std::vector<size_t> read_doubles(chunk_starts.size(), 0);
         std::vector<size_t> positions = chunk_starts;
@@ -56,10 +55,6 @@ namespace sorting_algorithms {
         }
     }
 
-
-
-
-
     void write_chunk_to_file(const std::vector<double> &chunk, std::ofstream &file) {
         for (double value: chunk) {
             file.write(reinterpret_cast<const char *>(&value), sizeof(double));
@@ -74,7 +69,7 @@ namespace sorting_algorithms {
         size_t max_chunk_size = memory_threshold / sizeof(double);
         std::vector<double> chunk;
 
-        // temporary file to store sorted chunks
+        // Temporary file to store sorted chunks
         const std::string temp_filename = "temp.bin";
         std::ofstream temp_file(temp_filename, std::ios::binary);
 
@@ -114,6 +109,5 @@ namespace sorting_algorithms {
     }
 
 }
-
 
 #endif //LARGE_FILE_SORTER_EXTERNAL_SORT_HPP

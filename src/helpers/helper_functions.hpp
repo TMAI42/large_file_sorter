@@ -86,7 +86,6 @@ namespace helpers {
 
         std::cout << output_filename << (is_sorted(output_filename) ? " is sorted!\n" : "is NOT sorted!") << std::endl;
 
-
     }
 
 }

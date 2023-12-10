@@ -13,6 +13,12 @@ Input example:
 1.64584e+304
 ```
 
+It based on standard [External sorting](https://en.wikipedia.org/wiki/External_sorting) algorithm:
+
+1. **Divide** data into smaller 'chunks'
+2. **Sort** each chunk and **write** them back to the external memory (disk)
+3. **Merge** sorted chunks into output file 
+
 ### Prerequisites
 - C++23 compatible compiler
 - CMake (version 3.26 or higher)
@@ -53,8 +59,12 @@ Additionally, you can generate large file, and iterate through it. See:
 | 1                 | 1.1            | 152      | 71,798         | 660.08                           |
 | 2                 | 1.1            | 163      | 71,796         | 660.08                           |
 | 3                 | 1.1            | 158      | 71,82          | 660.08                           |
-       
 
+## Note
+
+This task could be much easier for binary file, in this case we would be able to implement efficient inplace sort as explained in [An Efficient External Sort Algorithm with no Additional Space](https://www.researchgate.net/publication/220460059_An_Efficient_External_Sort_Algorithm_with_no_Additional_Space_Short_Note).
+But this task is almost imposable due data structure: we are using strings as data, so each individual element 
+could have different size
 
 ## Resources 
 
