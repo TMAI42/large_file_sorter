@@ -60,11 +60,12 @@ Additionally, you can generate large file, and iterate through it. See:
 | 2                 | 1.1            | 163      | 71,796         | 660.08                           |
 | 3                 | 1.1            | 158      | 71,82          | 660.08                           |
 
-## Note
+## Future improvements 
 
 This task could be much easier for binary file, in this case we would be able to implement efficient inplace sort as explained in [An Efficient External Sort Algorithm with no Additional Space](https://www.researchgate.net/publication/220460059_An_Efficient_External_Sort_Algorithm_with_no_Additional_Space_Short_Note).
-But this task is almost imposable due data structure: we are using strings as data, so each individual element 
-could have different size
+But this is not the best solution due data structure: we are using strings as data, so each individual element 
+could have different size, mb this would be implemented if future versions by extending file size and then use file in revers
+
 
 ## Resources 
 
