@@ -5,8 +5,116 @@
 #ifndef LARGE_FILE_SORTER_EXTERNAL_SORT_HPP
 #define LARGE_FILE_SORTER_EXTERNAL_SORT_HPP
 
-namespace sorting_algorithms{
+#include <algorithm>
+#include <array>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cstddef>
+#include <cstdint>
+#include <vector>
+#include <queue>
+
+namespace sorting_algorithms {
+
+    void merge_chunks(const std::string& binary_file_name, const std::vector<size_t>& chunk_starts, const size_t max_chunk_size, const std::string& output_file_name) {
+        std::ifstream binary_file(binary_file_name, std::ios::binary);
+        std::ofstream output_file(output_file_name, std::ios::out);
+
+        auto compare = [](const std::pair<double, size_t>& a, const std::pair<double, size_t>& b) {
+            return a.first > b.first;
+        };
+        std::priority_queue<std::pair<double, size_t>, std::vector<std::pair<double, size_t>>, decltype(compare)> min_heap(compare);
+
+        std::vector<size_t> positions = chunk_starts;
+        std::vector<size_t> read_bytes(chunk_starts.size(), 0);
+
+        for (size_t i = 0; i < chunk_starts.size(); ++i) {
+            double value;
+            if (binary_file.read(reinterpret_cast<char*>(&value), sizeof(value))) {
+                min_heap.emplace(value, i);
+                positions[i] += sizeof(double);
+                read_bytes[i] += sizeof(double);
+            }
+        }
+
+        while (!min_heap.empty()) {
+            auto [value, chunk_index] = min_heap.top();
+            min_heap.pop();
+
+            output_file << std::scientific << value << '\n';
+
+            if (read_bytes[chunk_index] < max_chunk_size) {
+                binary_file.seekg(positions[chunk_index], std::ios::beg);
+                double next_value;
+                if (binary_file.read(reinterpret_cast<char*>(&next_value), sizeof(next_value))) {
+                    min_heap.emplace(next_value, chunk_index);
+                    positions[chunk_index] += sizeof(double);
+                    read_bytes[chunk_index] += sizeof(double);
+                }
+            }
+        }
+    }
+
+
+
+    void write_chunk_to_file(const std::vector<double> &chunk, std::ofstream &file) {
+        for (double value: chunk) {
+            file.write(reinterpret_cast<const char *>(&value), sizeof(double));
+        }
+    }
+
+    void external_sort(const std::string &input_filename, const std::string &output_filename, size_t max_memory) {
+
+        std::ifstream input_data(input_filename);
+        std::string line;
+        size_t memory_threshold = max_memory / 2; // We want to leave memory for sorting
+        size_t max_chunk_size = memory_threshold / sizeof(double);
+        std::vector<double> chunk;
+
+        // temporary file to store sorted chunks
+        const std::string temp_filename = "temp.bin";
+        std::ofstream temp_file(temp_filename, std::ios::binary);
+
+        size_t chunk_count = 0;
+
+        // Read, sort, and write chunks to temp file
+        while (std::getline(input_data, line)) {
+            chunk.emplace_back(std::stod(line));
+            if (chunk.size() >= max_chunk_size) {
+                std::sort(chunk.begin(), chunk.end());
+                write_chunk_to_file(chunk, temp_file);
+                chunk_count++;
+                chunk.clear();
+            }
+        }
+
+        if (!chunk.empty()) {
+            std::sort(chunk.begin(), chunk.end());
+            write_chunk_to_file(chunk, temp_file);
+            chunk_count++;
+        }
+
+        input_data.close();
+        temp_file.close();
+
+        std::ifstream temp_input(temp_filename, std::ios::binary);
+        std::ofstream output_data(output_filename);
+
+        std::vector<size_t> chunk_starts;
+
+        for (size_t i = 0; i < chunk_count; ++i) {
+            chunk_starts.push_back(i * max_chunk_size * sizeof(double));
+        }
+
+        merge_chunks(temp_filename, chunk_starts, max_chunk_size, output_filename);
+
+        temp_input.close();
+        output_data.close();
+        std::remove(temp_filename.c_str());
+    }
 
 }
+
 
 #endif //LARGE_FILE_SORTER_EXTERNAL_SORT_HPP

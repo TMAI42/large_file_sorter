@@ -44,8 +44,17 @@ Additionally, you can generate large file, and iterate through it. See:
 ## Core features
 
 - **Generator for unsorted file**. Implemented generator to get numbers from file one by one 
+- **Generate large file**. Implemented large file generation to test
 
 ## Performance benchmarking 
+
+| Experiment number | File size (GB) | Time (s) | RAM Usage (MB) | Additional Hard drive usage (MB) |
+|-------------------|----------------|----------|----------------|----------------------------------|
+| 1                 | 1.1            | 251      | 71,798         | 660.08                           |
+| 2                 | 1.1            | 177      | 71,796         | 660.08                           |
+| 3                 | 1.1            | 192      | 71,82          | 660.08                           |
+       
+
 
 ## Resources 
 

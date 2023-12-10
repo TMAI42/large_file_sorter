@@ -6,7 +6,7 @@ int main(int argc, char* argv[]) {
 
     // Simple command line interface
     if (argc == 3) {
-        //sort(argv[1], argv[2]);
+        helpers::sort(argv[1], argv[2]);
         return 0;
     } else if (argc == 2) {
         std::string arg = argv[1];

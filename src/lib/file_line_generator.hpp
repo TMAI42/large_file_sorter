@@ -7,74 +7,29 @@
 
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <coroutine>
+#include <fstream>
+#include <optional>
+#include <limits>
 
 class file_line_generator {
 public:
-    struct promise_type {
-        std::string current_line;
-        std::ifstream file;
-        std::suspend_always initial_suspend() { return {}; }
-        std::suspend_always final_suspend() noexcept { return {}; }
-
-        promise_type() = default;
-        ~promise_type() = default;
-
-        file_line_generator get_return_object() {
-            return {handle_type::from_promise(*this)};
+    file_line_generator(const std::string& filename) : file(filename) {
+        if (!file.is_open()) {
+            throw std::runtime_error("Unable to open file: " + filename);
         }
-
-        std::suspend_always yield_value(std::string line) {
-            current_line = std::move(line);
-            return {};
-        }
-
-        void return_void() {}
-
-        void unhandled_exception() {
-            std::exit(1);
-        }
-    };
-
-    using handle_type = std::coroutine_handle<promise_type>;
-
-    file_line_generator(handle_type h) : handle(h) {}
-    ~file_line_generator() { if (handle) handle.destroy(); }
-
-    file_line_generator(const file_line_generator&) = delete;
-    file_line_generator& operator=(const file_line_generator&) = delete;
-
-    file_line_generator(file_line_generator&& other) noexcept : handle(other.handle) {
-        other.handle = nullptr;
     }
 
-    file_line_generator& operator=(file_line_generator&& other) noexcept {
-        if (this != &other) {
-            handle = other.handle;
-            other.handle = nullptr;
+    std::optional<double> next() {
+        std::string line;
+        if (std::getline(file, line)) {
+            return std::stod(line);
         }
-        return *this;
+        return {};
     }
-
-    bool move_next() { return handle ? (handle.resume(), !handle.done()) : false; }
-    [[nodiscard]] std::string current_value() const { return handle.promise().current_line; }
 
 private:
-    handle_type handle;
+    std::ifstream file;
 };
-
-file_line_generator read_lines(const std::string& filename) {
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        throw std::runtime_error("Unable to open file: " + filename);
-    }
-
-    std::string line;
-    while (std::getline(file, line)) {
-        co_yield line;
-    }
-}
 
 
 #endif //LINE_GENERATOR_HPP
