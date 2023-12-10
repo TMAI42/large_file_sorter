@@ -17,44 +17,46 @@
 
 namespace sorting_algorithms {
 
+
     void merge_chunks(const std::string& binary_file_name, const std::vector<size_t>& chunk_starts, const size_t max_chunk_size, const std::string& output_file_name) {
         std::ifstream binary_file(binary_file_name, std::ios::binary);
         std::ofstream output_file(output_file_name, std::ios::out);
 
-        auto compare = [](const std::pair<double, size_t>& a, const std::pair<double, size_t>& b) {
-            return a.first > b.first;
-        };
-        std::priority_queue<std::pair<double, size_t>, std::vector<std::pair<double, size_t>>, decltype(compare)> min_heap(compare);
-
+        std::vector<std::pair<double, size_t>> heap; // here could be priority queue, but std has bag in it when sorting floats/doubles
+        heap.reserve(chunk_starts.size());
+        std::vector<size_t> read_doubles(chunk_starts.size(), 0);
         std::vector<size_t> positions = chunk_starts;
-        std::vector<size_t> read_bytes(chunk_starts.size(), 0);
 
         for (size_t i = 0; i < chunk_starts.size(); ++i) {
+            binary_file.seekg(positions[i], std::ios::beg);
             double value;
             if (binary_file.read(reinterpret_cast<char*>(&value), sizeof(value))) {
-                min_heap.emplace(value, i);
+                heap.emplace_back(value, i);
                 positions[i] += sizeof(double);
-                read_bytes[i] += sizeof(double);
+                read_doubles[i]++;
             }
         }
 
-        while (!min_heap.empty()) {
-            auto [value, chunk_index] = min_heap.top();
-            min_heap.pop();
+        while (!heap.empty()) {
+            auto min_it = std::min_element(heap.begin(), heap.end());
+            auto [min_value, min_index] = *min_it;
 
-            output_file << std::scientific << value << '\n';
+            output_file << std::scientific << min_value << '\n';
+            heap.erase(min_it);
 
-            if (read_bytes[chunk_index] < max_chunk_size) {
-                binary_file.seekg(positions[chunk_index], std::ios::beg);
+            if (read_doubles[min_index] < max_chunk_size) {
+                binary_file.seekg(positions[min_index], std::ios::beg);
                 double next_value;
                 if (binary_file.read(reinterpret_cast<char*>(&next_value), sizeof(next_value))) {
-                    min_heap.emplace(next_value, chunk_index);
-                    positions[chunk_index] += sizeof(double);
-                    read_bytes[chunk_index] += sizeof(double);
+                    heap.emplace_back(next_value, min_index);
+                    positions[min_index] += sizeof(double);
+                    read_doubles[min_index]++;
                 }
             }
         }
     }
+
+
 
 
 
@@ -68,7 +70,7 @@ namespace sorting_algorithms {
 
         std::ifstream input_data(input_filename);
         std::string line;
-        size_t memory_threshold = max_memory / 2; // We want to leave memory for sorting
+        size_t memory_threshold = max_memory / 5 * 2; // We want to leave memory for sorting
         size_t max_chunk_size = memory_threshold / sizeof(double);
         std::vector<double> chunk;
 
@@ -99,7 +101,6 @@ namespace sorting_algorithms {
         temp_file.close();
 
         std::ifstream temp_input(temp_filename, std::ios::binary);
-        std::ofstream output_data(output_filename);
 
         std::vector<size_t> chunk_starts;
 
@@ -109,8 +110,6 @@ namespace sorting_algorithms {
 
         merge_chunks(temp_filename, chunk_starts, max_chunk_size, output_filename);
 
-        temp_input.close();
-        output_data.close();
         std::remove(temp_filename.c_str());
     }
 

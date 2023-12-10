@@ -68,7 +68,6 @@ namespace helpers {
         while (auto value_opt = generator.next()) {
             double value = *value_opt;
             if (value < previous_value) {
-                std::cout << value << " " << previous_value;
                 return false;  // Data is not sorted
             }
             previous_value = value;

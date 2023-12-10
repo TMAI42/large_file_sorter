@@ -50,9 +50,9 @@ Additionally, you can generate large file, and iterate through it. See:
 
 | Experiment number | File size (GB) | Time (s) | RAM Usage (MB) | Additional Hard drive usage (MB) |
 |-------------------|----------------|----------|----------------|----------------------------------|
-| 1                 | 1.1            | 251      | 71,798         | 660.08                           |
-| 2                 | 1.1            | 177      | 71,796         | 660.08                           |
-| 3                 | 1.1            | 192      | 71,82          | 660.08                           |
+| 1                 | 1.1            | 152      | 71,798         | 660.08                           |
+| 2                 | 1.1            | 163      | 71,796         | 660.08                           |
+| 3                 | 1.1            | 158      | 71,82          | 660.08                           |
        
 
 
